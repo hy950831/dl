@@ -10,7 +10,6 @@ GenerateSimulateScript()
 set(PLATFORM "x86_64" CACHE STRING "Platform to test")
 set(RELEASE OFF CACHE BOOL "Performance optimized build")
 set(VERIFICATION OFF CACHE BOOL "Only verification friendly kernel features")
-k
 set_property(CACHE PLATFORM PROPERTY STRINGS ${KernelX86Sel4Arch_all_strings} ${KernelARMPlatform_all_strings} ${KernelRiscVPlatform_all_strings})
 
 # Determine the platform/architecture
@@ -35,7 +34,6 @@ else()
     if(ARM_HYP)
         set(KernelArmHypervisorSupport ON CACHE BOOL "" FORCE)
     endif()
-    ../init-build.sh -DPLATFORM=x86_64 -DSIMULATION=TRUE
 
     if(AARCH64)
         set(KernelArmSel4Arch "aarch64" CACHE STRING "" FORCE)
