@@ -10,6 +10,8 @@ GenerateSimulateScript()
 set(PLATFORM "x86_64" CACHE STRING "Platform to test")
 set(RELEASE OFF CACHE BOOL "Performance optimized build")
 set(VERIFICATION OFF CACHE BOOL "Only verification friendly kernel features")
+set(PRINTING ON CACHE BOOL "Printing feature")
+
 set_property(CACHE PLATFORM PROPERTY STRINGS ${KernelX86Sel4Arch_all_strings} ${KernelARMPlatform_all_strings} ${KernelRiscVPlatform_all_strings})
 
 # Determine the platform/architecture
@@ -48,6 +50,16 @@ else()
     ApplyData61ElfLoaderSettings(${KernelARMPlatform} ${KernelArmSel4Arch})
 endif()
 
+# libsel4 settings
+# For the tutorials that do initialize the plat support serial printing they still
+# just want to use the kernel debug putchar if it exists
+set(LibSel4PlatSupportUseDebugPutChar TRUE CACHE BOOL "" FORCE)
+# Just let the regular abort spin without calling DebugHalt to prevent needless
+# confusing output from the kernel for a tutorial
+set(LibSel4MuslcSysDebugHalt FALSE CACHE BOOL "" FORCE)
+
+ApplyCommonReleaseVerificationSettings(${RELEASE} ${VERIFICATION})
+
 if(SIMULATION)
     ApplyCommonSimulationSettings(${KernelArch})
 else()
@@ -56,8 +68,6 @@ else()
     endif()
 endif()
 
-ApplyCommonReleaseVerificationSettings(${RELEASE} ${VERIFICATION})
-
 # Name the executable and list source files required to build it
 add_executable(dl src/main.c)
 
@@ -65,7 +75,9 @@ add_executable(dl src/main.c)
 target_link_libraries(dl
     sel4
     muslc utils
-    sel4muslcsys sel4utils)
+    sel4muslcsys sel4utils
+    sel4platsupport sel4debug
+    )
 
 # Tell the build system that this application is the root task.
 DeclareRootserver(dl)

@@ -1,14 +1,12 @@
 #include <stdio.h>
 #include <sel4/sel4.h>
+#include <sel4platsupport/bootinfo.h>
+#include <sel4platsupport/platsupport.h>
+#include <utils/util.h>
 
 int main(int argc, char const *argv[])
 {
-    // seL4_DebugPutChar('H');
-    // seL4_DebugPutChar('i');
-    // seL4_DebugPutChar('!');
-    // seL4_DebugPutChar('\n');
-    printf("TEST\n");
-
-    while(1);
+    platsupport_serial_setup_bootinfo_failsafe();
+    printf("Here\n");
     return 0;
 }
