@@ -1,83 +1,54 @@
 
+#
+# Copyright 2018, Data61
+# Commonwealth Scientific and Industrial Research Organisation (CSIRO)
+# ABN 41 687 119 230.
+#
+# This software may be distributed and modified according to the terms of
+# the BSD 2-Clause license. Note that NO WARRANTY is provided.
+# See "LICENSE_BSD2.txt" for details.
+#
 # @TAG(DATA61_BSD)
-cmake_minimum_required(VERSION 3.7.2)
-# declare the dl CMake project and the languages it is written in (just C)
-project(dl C)
+#
+ImportCapDL()
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -u __vsyscall_ptr")
 
-include(${KERNEL_HELPERS_PATH})
-GenerateSimulateScript()
 
-set(PLATFORM "x86_64" CACHE STRING "Platform to test")
-set(RELEASE OFF CACHE BOOL "Performance optimized build")
-set(VERIFICATION OFF CACHE BOOL "Only verification friendly kernel features")
-set(PRINTING ON CACHE BOOL "Printing feature")
+cdl_pp(${CMAKE_CURRENT_SOURCE_DIR}/manifest.py cdl_pp_target
+    ELF "program_1"
+    CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_program_1.c"
 
-set_property(CACHE PLATFORM PROPERTY STRINGS ${KernelX86Sel4Arch_all_strings} ${KernelARMPlatform_all_strings} ${KernelRiscVPlatform_all_strings})
+    ELF "program_2"
+    CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_program_2.c"
+)
 
-# Determine the platform/architecture
-if (${PLATFORM} IN_LIST KernelX86Sel4Arch_all_strings)
-    set(KernelArch x86 CACHE STRING "" FORCE)
-    set(KernelX86Sel4Arch ${PLATFORM} CACHE STRING "" FORCE)
-elseif(${PLATFORM} IN_LIST KernelRiscVPlatform_all_strings)
-    set(KernelArch riscv CACHE STRING "" FORCE)
-    set(KernelRiscVPlatform ${PLATFORM} CACHE STRING "" FORCE)
-    if(RISCV64)
-        set(KernelRiscVSel4Arch "riscv64" CACHE STRING "" FORCE)
-    else()
-        set(KernelRiscVSel4Arch "riscv32" CACHE STRING "" FORCE)
-    endif()
-else()
-    if (NOT ${PLATFORM} IN_LIST KernelARMPlatform_all_strings)
-        message(FATAL_ERROR "Unknown PLATFORM. Initial configuration may not work")
-    endif()
-    set(KernelArch arm CACHE STRING "" FORCE)
-    set(KernelARMPlatform ${PLATFORM} CACHE STRING "" FORCE)
 
-    if(ARM_HYP)
-        set(KernelArmHypervisorSupport ON CACHE BOOL "" FORCE)
-    endif()
+add_executable(program_1 EXCLUDE_FROM_ALL program_1.c cspace_program_1.c)
+add_dependencies(program_1 cdl_pp_target)
+target_link_libraries(program_1 sel4tutorials)
 
-    if(AARCH64)
-        set(KernelArmSel4Arch "aarch64" CACHE STRING "" FORCE)
-    elseif(AARCH32)
-        set(KernelArmSel4Arch "aarch32" CACHE STRING "" FORCE)
-        if(ARM_HYP)
-            set(KernelArmSel4Arch "arm_hyp" CACHE STRING "" FORCE)
-        endif()
-    endif()
+list(APPEND elf_files "$<TARGET_FILE:program_1>")
+list(APPEND elf_targets "program_1")
 
-    # Elfloader settings that correspond to how Data61 sets its boards up.
-    ApplyData61ElfLoaderSettings(${KernelARMPlatform} ${KernelArmSel4Arch})
-endif()
 
-# libsel4 settings
-# For the tutorials that do initialize the plat support serial printing they still
-# just want to use the kernel debug putchar if it exists
-set(LibSel4PlatSupportUseDebugPutChar TRUE CACHE BOOL "" FORCE)
-# Just let the regular abort spin without calling DebugHalt to prevent needless
-# confusing output from the kernel for a tutorial
-set(LibSel4MuslcSysDebugHalt FALSE CACHE BOOL "" FORCE)
+add_executable(program_2 EXCLUDE_FROM_ALL program_2.c cspace_program_2.c)
+add_dependencies(program_2 cdl_pp_target)
+target_link_libraries(program_2 sel4tutorials)
 
-ApplyCommonReleaseVerificationSettings(${RELEASE} ${VERIFICATION})
+list(APPEND elf_files "$<TARGET_FILE:program_2>")
+list(APPEND elf_targets "program_2")
 
-if(SIMULATION)
-    ApplyCommonSimulationSettings(${KernelArch})
-else()
-    if(KernelArchX86)
-        set(KernelIOMMU ON CACHE BOOL "" FORCE)
-    endif()
-endif()
+cdl_ld("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec
+    MANIFESTS ${CMAKE_CURRENT_SOURCE_DIR}/manifest.py
+    ELF ${elf_files}
+    DEPENDS ${elf_targets})
 
-# Name the executable and list source files required to build it
-add_executable(dl src/main.c)
+DeclareCDLRootImage("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec ELF ${elf_files} ELF_DEPENDS ${elf_targets})
 
-# List of libraries to link with the application.
-target_link_libraries(dl
-    sel4
-    muslc utils
-    sel4muslcsys sel4utils
-    sel4platsupport sel4debug
-    )
 
-# Tell the build system that this application is the root task.
-DeclareRootserver(dl)
+set(FINISH_COMPLETION_TEXT "lazy")
+set(START_COMPLETION_TEXT "
+the
+the
+the")
+configure_file(${CMAKE_SOURCE_DIR}/projects/sel4-tutorials/tools/expect.py ${CMAKE_BINARY_DIR}/check @ONLY)
