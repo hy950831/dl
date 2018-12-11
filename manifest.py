@@ -110,8 +110,9 @@ cspaces = {'program_1':program_1_alloc, 'program_2': program_2_alloc}
 program_1_addr_alloc = AddressSpaceAllocator('addr allocator 1', vspace_program_1)
 program_1_addr_alloc._symbols = {
 'mainIpcBuffer': ([4096], [Cap(ipc_program_1_obj, read=True, write=True)]),
+'sharedFrame': ([4096], [Cap(shared_frame_obj, read=True, write=True)]),
 'stack': (
-    [4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096],
+    [4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096],
 	[Cap(stack_0_program_1_obj, read=True, write=True),
 	 Cap(stack_1_program_1_obj, read=True, write=True),
 	 Cap(stack_2_program_1_obj, read=True, write=True),
@@ -122,15 +123,15 @@ program_1_addr_alloc._symbols = {
 	 Cap(stack_7_program_1_obj, read=True, write=True),
 	 Cap(stack_8_program_1_obj, read=True, write=True),
 	 Cap(stack_9_program_1_obj, read=True, write=True),
-     Cap(shared_frame_obj, read=True, write=True),
     ]),
 }
 
 program_2_addr_alloc = AddressSpaceAllocator('addr allocator 2', vspace_program_2)
 program_2_addr_alloc._symbols = {
 'mainIpcBuffer': ([4096], [Cap(ipc_program_2_obj, read=True, write=True)]),
+'sharedFrame': ([4096], [Cap(shared_frame_obj, read=True, write=True)]),
 'stack': (
-    [4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096],
+    [4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096, 4096],
 	[Cap(stack_0_program_2_obj, read=True, write=True),
 	 Cap(stack_1_program_2_obj, read=True, write=True),
 	 Cap(stack_2_program_2_obj, read=True, write=True),
@@ -141,7 +142,6 @@ program_2_addr_alloc._symbols = {
 	 Cap(stack_7_program_2_obj, read=True, write=True),
 	 Cap(stack_8_program_2_obj, read=True, write=True),
 	 Cap(stack_9_program_2_obj, read=True, write=True),
-     Cap(shared_frame_obj, read=True, write=True)
     ]),
 }
 
@@ -154,19 +154,25 @@ cap_symbols = {
     'program_1':
 	    [('endpoint', 1),
 	     ('cnode', 2),
-	     ('shared_frame_cap', 1),
         ],
     'program_2':
 	    [('endpoint', 1),
 	     ('cnode', 2),
-	     ('shared_frame_cap', 1),
         ]
                }
 
 region_symbols = {
-    'program_1': [('stack', 65536, 'size_12bit'), ('mainIpcBuffer', 4096, 'size_12bit')],
-    'program_2': [('stack', 65536, 'size_12bit'), ('mainIpcBuffer', 4096, 'size_12bit')]
-                 }
+    'program_1': [
+        ('stack', 40960, 'size_12bit'),
+        ('mainIpcBuffer', 4096, 'size_12bit'),
+        ('sharedFrame', 4096, 'size_12bit')
+    ],
+    'program_2': [
+        ('stack', 40960, 'size_12bit'),
+        ('mainIpcBuffer', 4096, 'size_12bit'),
+        ('sharedFrame', 4096, 'size_12bit')
+    ]
+}
 
 elfs =  {
     'program_1': {'passive': False, 'filename': 'program_1.c'},

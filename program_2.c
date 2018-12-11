@@ -5,7 +5,7 @@
 #include <sel4/sel4.h>
 #include <utils/util.h>
 
-#define SHARED_VADDR 0x421000
+#define SHARED_VADDR 0x422000
 
 int main(int c, char *argv[]) {
 
