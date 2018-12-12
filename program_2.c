@@ -1,9 +1,6 @@
 
-
-#include <assert.h>
 #include <stdio.h>
-#include <sel4/sel4.h>
-#include <utils/util.h>
+/* #include "set.h" */
 
 #define SHARED_VADDR 0x422000
 
