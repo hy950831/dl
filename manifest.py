@@ -124,10 +124,10 @@ shared_lib_alloc.slot = 2
 cspaces = {
     'program_1':program_1_alloc,
     'program_2': program_2_alloc,
-    'libshared_lib.so': shared_lib_alloc
+    'libshared.so': shared_lib_alloc
 }
 
-shared_lib_addr_alloc = AddressSpaceAllocator('addr allocator libshared_lib.so', vspace_shared_lib)
+shared_lib_addr_alloc = AddressSpaceAllocator('addr allocator libshared.so', vspace_shared_lib)
 shared_lib_addr_alloc._symbols = {
 'stack': (
     [4096, 4096, 4096, 4096],
@@ -179,7 +179,7 @@ program_2_addr_alloc._symbols = {
 addr_spaces = {
     'program_1': program_1_addr_alloc,
  	'program_2': program_2_addr_alloc,
- 	'libshared_lib.so': shared_lib_addr_alloc,
+ 	'libshared.so': shared_lib_addr_alloc,
                }
 
 cap_symbols = {
@@ -191,9 +191,10 @@ cap_symbols = {
 	    [('endpoint', 1),
 	     ('cnode', 2),
         ],
-    'libshared_lib.so':
+    'libshared.so':
         [],
                }
+
 
 region_symbols = {
     'program_1': [
@@ -206,7 +207,7 @@ region_symbols = {
         ('mainIpcBuffer', 4096, 'size_12bit'),
         ('sharedFrame', 4096, 'size_12bit')
     ],
-    'libshared_lib.so': [
+    'libshared.so': [
         ('stack', 40960, 'size_12bit'),
     ]
 }
@@ -214,7 +215,7 @@ region_symbols = {
 elfs =  {
     'program_1': {'passive': False, 'filename': 'program_1.c'},
     'program_2': {'passive': False, 'filename': 'program_2.c'},
-    'libshared_lib.so': {'passive': False, 'filename': 'lib/set.c'}
+    'libshared.so': {'passive': False, 'filename': 'lib/set.c'}
          }
 
 print(pickle.dumps((objects, cspaces, addr_spaces, cap_symbols, region_symbols, elfs)))
