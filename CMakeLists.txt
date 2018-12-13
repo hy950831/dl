@@ -43,12 +43,17 @@ target_include_directories(program_1 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 # staticlly link the program_1 with the tutorial lib which is already
 # linked with sel4 muslc and etc
 target_link_libraries(program_1 sel4tutorials)
+
 # FIXME: linking with the libs below won't set up the serial even explicitly called
 # the serial setup function
 # target_link_libraries( program_1 Configuration sel4platsupport sel4muslcsys muslc sel4)
 
+# TODO: add a helper function to manually set so dependencies
+# declare_so_dependency(program_1 shared)
+
 # add the result file of program_1 to the elf_files list
 list(APPEND elf_files "$<TARGET_FILE:program_1>")
+list(APPEND cpio_files "$<TARGET_FILE:program_1>")
 # add program_1 to target list
 list(APPEND elf_targets "program_1")
 
@@ -57,8 +62,11 @@ list(APPEND elf_targets "program_1")
 SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 add_library(shared SHARED lib/set.c)
 
+
 # FIXME: modify capdl_loader.py to somehow support shared objects in
 # the elf list
+list(APPEND cpio_files "$<TARGET_FILE:shared>")
+
 list(APPEND so_files "$<TARGET_FILE:shared>")
 list(APPEND elf_targets "shared")
 
@@ -70,6 +78,7 @@ target_link_libraries(program_2 sel4tutorials)
 # target_link_libraries( program_2 Configuration sel4platsupport sel4muslcsys muslc sel4)
 
 list(APPEND elf_files "$<TARGET_FILE:program_2>")
+list(APPEND cpio_files "$<TARGET_FILE:program_2>")
 list(APPEND elf_targets "program_2")
 
 cdl_ld_with_so("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec
@@ -79,7 +88,8 @@ cdl_ld_with_so("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec
     DEPENDS ${elf_targets}
     )
 
-DeclareCDLRootImage("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec ELF ${elf_files} ELF_DEPENDS ${elf_targets})
+
+DeclareCDLRootImage("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec ELF ${cpio_files} ELF_DEPENDS ${elf_targets})
 
 
 set(FINISH_COMPLETION_TEXT "lazy")

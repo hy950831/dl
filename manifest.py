@@ -7,7 +7,8 @@ from capdl.Allocator import ObjectAllocator, CSpaceAllocator, AddressSpaceAlloca
 
 cnode_program_1 = CNode("cnode_program_1", 2) # A CNode which has 3 slots
 cnode_program_2 = CNode("cnode_program_2", 2) # A CNode which has 3 slots
-cnode_shared_lib = CNode("cnode_shared_lib", 1)
+cnode_shared_lib = CNode("cnode_shared_lib", 2)
+
 
 shared_frame_obj = Frame("shared_frame_obj", 4096)
 
@@ -28,8 +29,36 @@ vspace_program_1 = PML4("vspace_program_1")
 vspace_program_2 = PML4("vspace_program_2")
 vspace_shared_lib = PML4("vspace_shared_lib")
 
-tcb_program_1 = TCB("tcb_program_1",ipc_buffer_vaddr= 0x0,ip= 0x0,sp= 0x0,elf= "program_1",prio= 254,max_prio= 254,affinity= 0,init= [])
-tcb_program_2 = TCB("tcb_program_2",ipc_buffer_vaddr= 0x0,ip= 0x0,sp= 0x0,elf= "program_2",prio= 254,max_prio= 254,affinity= 0,init= [])
+tcb_program_1 = TCB("tcb_program_1",
+                    ipc_buffer_vaddr= 0x0,
+                    ip= 0x0,
+                    sp= 0x0,
+                    elf= "program_1",
+                    prio= 254,
+                    max_prio= 254,
+                    affinity= 0,
+                    init= []
+                    )
+tcb_program_2 = TCB("tcb_program_2",
+                    ipc_buffer_vaddr= 0x0,
+                    ip= 0x0,
+                    sp= 0x0,
+                    elf= "program_2",
+                    prio= 254,
+                    max_prio= 254,
+                    affinity= 0,
+                    init= []
+                    )
+tcb_shared = TCB("tcb_shared",
+                     ipc_buffer_vaddr= 0x0,
+                     ip= 0x0,
+                     sp= 0x0,
+                     elf= "libshared.so",
+                     prio= 0,
+                     max_prio= 0,
+                     affinity= 0,
+                     init= []
+                     )
 
 tcb_program_1['cspace'] = Cap(cnode_program_1)
 tcb_program_1['vspace'] = Cap(vspace_program_1)
@@ -38,6 +67,9 @@ tcb_program_1['ipc_buffer_slot'] = Cap(ipc_program_1_obj, read=True, write=True)
 tcb_program_2['cspace'] = Cap(cnode_program_2)
 tcb_program_2['vspace'] = Cap(vspace_program_2)
 tcb_program_2['ipc_buffer_slot'] = Cap(ipc_program_2_obj, read=True, write=True)
+
+tcb_shared['cspace'] = Cap(cnode_shared_lib)
+tcb_shared['vspace'] = Cap(vspace_shared_lib)
 
 stack_0_program_1_obj = Frame("stack_0_program_1_obj", 4096)
 stack_1_program_1_obj = Frame("stack_1_program_1_obj", 4096)
@@ -102,6 +134,7 @@ vspace_program_2,
 vspace_shared_lib,
 tcb_program_1,
 tcb_program_2,
+tcb_shared,
 shared_frame_obj,
 ])
 
@@ -109,7 +142,7 @@ spec = Spec('x86_64')
 spec.objs = obj
 objects = ObjectAllocator()
 objects.spec.arch  = 'x86_64'
-objects.counter = 36
+objects.counter = 37
 objects.merge(spec)
 
 program_1_alloc = CSpaceAllocator(cnode_program_1)
@@ -124,18 +157,19 @@ shared_lib_alloc.slot = 2
 cspaces = {
     'program_1':program_1_alloc,
     'program_2': program_2_alloc,
-    'libshared.so': shared_lib_alloc
+    'shared': shared_lib_alloc
 }
+
 
 shared_lib_addr_alloc = AddressSpaceAllocator('addr allocator libshared.so', vspace_shared_lib)
 shared_lib_addr_alloc._symbols = {
-'stack': (
-    [4096, 4096, 4096, 4096],
-	[Cap(stack_0_shared_lib_obj, read=True, write=True),
-	 Cap(stack_1_shared_lib_obj, read=True, write=True),
-	 Cap(stack_2_shared_lib_obj, read=True, write=True),
-	 Cap(stack_3_shared_lib_obj, read=True, write=True),
-    ]),
+#  'stack': (
+    #  [4096, 4096, 4096, 4096],
+	#  [Cap(stack_0_shared_lib_obj, read=True, write=True),
+	 #  Cap(stack_1_shared_lib_obj, read=True, write=True),
+	 #  Cap(stack_2_shared_lib_obj, read=True, write=True),
+	 #  Cap(stack_3_shared_lib_obj, read=True, write=True),
+    #  ]),
 }
 
 program_1_addr_alloc = AddressSpaceAllocator('addr allocator 1', vspace_program_1)
@@ -179,7 +213,7 @@ program_2_addr_alloc._symbols = {
 addr_spaces = {
     'program_1': program_1_addr_alloc,
  	'program_2': program_2_addr_alloc,
- 	'libshared.so': shared_lib_addr_alloc,
+ 	'shared': shared_lib_addr_alloc,
                }
 
 cap_symbols = {
@@ -191,7 +225,7 @@ cap_symbols = {
 	    [('endpoint', 1),
 	     ('cnode', 2),
         ],
-    'libshared.so':
+    'shared':
         [],
                }
 
@@ -207,8 +241,15 @@ region_symbols = {
         ('mainIpcBuffer', 4096, 'size_12bit'),
         ('sharedFrame', 4096, 'size_12bit')
     ],
-    'libshared.so': [
-        ('stack', 40960, 'size_12bit'),
+    'shared': [
+        # FIXME: Currently this thing is done by cdl_pp
+        # where the region symbols are defined in a generated c
+        # file and the generated c file is depended on sel4 and other
+        # libraries which are statically compiled which couldn't be linked
+        # with the so file(Even if we can then the dynamic linking is
+        # then meaningless by statically linking everything into the elf)
+
+        #  ('stack', 40960, 'size_12bit'),
     ]
 }
 
