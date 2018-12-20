@@ -48,6 +48,7 @@ target_link_libraries(program_1 sel4tutorials)
 # the serial setup function
 # target_link_libraries( program_1 Configuration sel4platsupport sel4muslcsys muslc sel4)
 
+
 # TODO: add a helper function to manually set so dependencies
 # declare_so_dependency(program_1 shared)
 
