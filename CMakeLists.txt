@@ -13,6 +13,8 @@
 ImportCapDL()
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -u __vsyscall_ptr")
 
+include(helper.cmake)
+
 
 # FIXME: should I add the shared lib in cdl_pp?
 # or how should i modify the cdl_pp function?
