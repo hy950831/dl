@@ -10,6 +10,7 @@ cnode_program_2 = CNode("cnode_program_2", 2) # A CNode which has 3 slots
 cnode_shared_lib = CNode("cnode_shared_lib", 2)
 
 
+
 shared_frame_obj = Frame("shared_frame_obj", 4096)
 
 ep = Endpoint("endpoint")
@@ -165,13 +166,13 @@ cspaces = {
 
 shared_addr_alloc = AddressSpaceAllocator('addr allocator libshared.so', vspace_shared)
 shared_addr_alloc._symbols = {
-#  'stack': (
-    #  [4096, 4096, 4096, 4096],
-	#  [Cap(stack_0_shared_lib_obj, read=True, write=True),
-	 #  Cap(stack_1_shared_lib_obj, read=True, write=True),
-	 #  Cap(stack_2_shared_lib_obj, read=True, write=True),
-	 #  Cap(stack_3_shared_lib_obj, read=True, write=True),
-    #  ]),
+'stack': (
+    [4096, 4096, 4096, 4096],
+    [Cap(stack_0_shared_lib_obj, read=True, write=True),
+     Cap(stack_1_shared_lib_obj, read=True, write=True),
+     Cap(stack_2_shared_lib_obj, read=True, write=True),
+     Cap(stack_3_shared_lib_obj, read=True, write=True),
+    ]),
 }
 
 program_1_addr_alloc = AddressSpaceAllocator('addr allocator 1', vspace_program_1)
@@ -253,7 +254,7 @@ region_symbols = {
         # with the so file(Even if we can then the dynamic linking is
         # then meaningless by statically linking everything into the elf)
 
-        #  ('stack', 40960, 'size_12bit'),
+        ('stack', 4096 * 4, 'size_12bit'),
     ]
 }
 
@@ -263,5 +264,7 @@ elfs =  {
     'libshared.so': {'passive': False, 'filename': 'lib/set.c'}
          }
 
+
 print(pickle.dumps((objects, cspaces, addr_spaces, cap_symbols, region_symbols, elfs)))
+
 

@@ -18,7 +18,8 @@ include(helper.cmake)
 
 # FIXME: should I add the shared lib in cdl_pp?
 # or how should i modify the cdl_pp function?
-cdl_pp(${CMAKE_CURRENT_SOURCE_DIR}/manifest.py cdl_pp_target
+cdl_pp_with_so(${CMAKE_CURRENT_SOURCE_DIR}/manifest.py cdl_pp_target cdl_pp_so_target
+
     ELF "program_1"
     CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_program_1.c"
 
@@ -30,6 +31,8 @@ cdl_pp(${CMAKE_CURRENT_SOURCE_DIR}/manifest.py cdl_pp_target
     # file which depends on sel4 and other libraries. which are statically
     # compiled, hence i need to modify cdl_pp(func manifest in capdl_linker.py)
     # somehow to correctly process shared libs
+    SO "libshared.so"
+    SO_CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_libshared.c"
 )
 
 
@@ -63,13 +66,15 @@ list(APPEND elf_targets "program_1")
 # Try to compile the shared library
 # FIXME: compile a duplicate set of sel4 kernel with -fPIC ????
 SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
-add_library(shared SHARED lib/set.c)
+add_library(shared SHARED lib/set.c cspace_libshared.c)
+add_dependencies(shared cdl_pp_so_target)
+
+# message(FATAL_ERROR "Hey ! ${cdl_pp_so_target} ${cdl_pp_target}")
 
 
 # FIXME: modify capdl_loader.py to somehow support shared objects in
 # the elf list
 list(APPEND cpio_files "$<TARGET_FILE:shared>")
-
 list(APPEND so_files "$<TARGET_FILE:shared>")
 list(APPEND elf_targets "shared")
 

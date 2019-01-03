@@ -19,9 +19,10 @@ function(cdl_ld_with_so outfile output_target)
     add_dependencies(${output_target} ${CDL_LD_DEPENDS})
 endfunction()
 
-function(cdl_pp_with_so manifest_in target)
-    cmake_parse_arguments(PARSE_ARGV 2 CDL_PP "" "" "ELF;CFILE;DEPENDS;SO")
+function(cdl_pp_with_so manifest_in target target_so)
+    cmake_parse_arguments(PARSE_ARGV 3 CDL_PP "" "" "ELF;CFILE;DEPENDS;SO;SO_CFILE")
     if (NOT "${CDL_PP_UNPARSED_ARGUMENTS}" STREQUAL "")
+        message(FATAL_ERROR "${CDL_PP_UNPARSED_ARGUMENTS}")
         message(FATAL_ERROR "Unknown arguments to cdl_pp_with_so")
     endif()
 
@@ -32,8 +33,19 @@ function(cdl_pp_with_so manifest_in target)
                 build_cnode
                 --manifest-in=-
                 --elffile ${CDL_PP_ELF}
-                --sofile ${CDL_PP_SO}
                 --ccspace ${CDL_PP_CFILE}
         DEPENDS  ${capdl_python} ${manifest_in} )
+
+    add_custom_command(OUTPUT ${CDL_PP_SO_CFILE}
+        COMMAND ${python_with_capdl} ${manifest_in} |
+        ${capdl_linker_tool}
+                --arch=${KernelSel4Arch}
+                build_so_cnode
+                --manifest-in=-
+                --sofile ${CDL_PP_SO}
+                --socspace ${CDL_PP_SO_CFILE}
+        DEPENDS  ${capdl_python} ${manifest_in})
+
+    add_custom_target(${target_so} DEPENDS ${CDL_PP_SO_CFILE})
     add_custom_target(${target} DEPENDS ${CDL_PP_CFILE})
 endfunction()
