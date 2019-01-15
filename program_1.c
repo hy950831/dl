@@ -8,7 +8,6 @@ int main(int c, char *argv[]) {
 
     int id = 1;
 
-    /* setTo10(&id); */
     printf("Program %d: Running!\n", id);
 
     for (int i = 0; i < 1000000; ++i) {}

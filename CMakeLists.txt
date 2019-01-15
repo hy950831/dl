@@ -13,6 +13,7 @@
 ImportCapDL()
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -u __vsyscall_ptr")
 
+
 include(helper.cmake)
 
 
@@ -42,6 +43,7 @@ add_executable(program_1 EXCLUDE_FROM_ALL program_1.c cspace_program_1.c)
 add_dependencies(program_1 cdl_pp_target)
 # add_dependencies(program_1 cdl_pp_target sel4platsupport sel4muslcsys muslc sel4)
 
+
 # FIXME: include directory doesn't work?
 target_include_directories(program_1 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
@@ -49,28 +51,20 @@ target_include_directories(program_1 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 # linked with sel4 muslc and etc
 target_link_libraries(program_1 sel4tutorials)
 
-# FIXME: linking with the libs below won't set up the serial even explicitly called
-# the serial setup function
-# target_link_libraries( program_1 Configuration sel4platsupport sel4muslcsys muslc sel4)
-
-
-# TODO: add a helper function to manually set so dependencies
-# declare_so_dependency(program_1 shared)
-
 # add the result file of program_1 to the elf_files list
 list(APPEND elf_files "$<TARGET_FILE:program_1>")
 list(APPEND cpio_files "$<TARGET_FILE:program_1>")
 # add program_1 to target list
 list(APPEND elf_targets "program_1")
 
-# Try to compile the shared library
-# FIXME: compile a duplicate set of sel4 kernel with -fPIC ????
 SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+
 add_library(shared SHARED lib/set.c cspace_libshared.c)
 add_dependencies(shared cdl_pp_so_target)
 
-# message(FATAL_ERROR "Hey ! ${cdl_pp_so_target} ${cdl_pp_target}")
+# target_link_libraries(program_1 -Wl,-Bdynamic shared)
 
+# message(FATAL_ERROR "Hey ! ${cdl_pp_so_target} ${cdl_pp_target}")
 
 # FIXME: modify capdl_loader.py to somehow support shared objects in
 # the elf list
@@ -81,9 +75,10 @@ list(APPEND elf_targets "shared")
 add_executable(program_2 EXCLUDE_FROM_ALL program_2.c cspace_program_2.c)
 # add_dependencies(program_2 Configuration cdl_pp_target sel4platsupport sel4muslcsys muslc sel4)
 add_dependencies(program_2 cdl_pp_target)
-# target_include_directories(program_2 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
-target_link_libraries(program_2 sel4tutorials)
-# target_link_libraries( program_2 Configuration sel4platsupport sel4muslcsys muslc sel4)
+target_include_directories(program_2 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+target_link_libraries(program_2  sel4tutorials)
+
+target_link_libraries(program_2 -Wl,-Bdynamic -Wl,-z,relro,-z,now shared)
 
 list(APPEND elf_files "$<TARGET_FILE:program_2>")
 list(APPEND cpio_files "$<TARGET_FILE:program_2>")
