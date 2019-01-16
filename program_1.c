@@ -10,7 +10,7 @@ int main(int c, char *argv[]) {
 
     printf("Program %d: Running!\n", id);
 
-    for (int i = 0; i < 1000000; ++i) {}
+    for (int i = 0; i < 100000000; ++i) { if(i % 10000000 == 0) printf("Tick!\n");}
     printf("In program 1 the shared frame store %d\n", *(int*)SHARED_VADDR);
 
     return 0;
