@@ -17,7 +17,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -u __vsyscall_ptr")
 include(helper.cmake)
 
 
-# FIXME: should I add the shared lib in cdl_pp?
+# XXX: should I add the shared lib in cdl_pp?
 # or how should i modify the cdl_pp function?
 cdl_pp_with_so(${CMAKE_CURRENT_SOURCE_DIR}/manifest.py cdl_pp_target cdl_pp_so_target
 
@@ -27,11 +27,12 @@ cdl_pp_with_so(${CMAKE_CURRENT_SOURCE_DIR}/manifest.py cdl_pp_target cdl_pp_so_t
     ELF "program_2"
     CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_program_2.c"
 
-    # FIXME: go understand the cdl_pp process
+    # XXX: go understand the cdl_pp process
     # NOTE: currently the cdl_pp processing will create a symbol declearation
     # file which depends on sel4 and other libraries. which are statically
     # compiled, hence i need to modify cdl_pp(func manifest in capdl_linker.py)
     # somehow to correctly process shared libs
+    # NOTE: issue above resolved
     SO "libshared.so"
     SO_CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_libshared.c"
 )
@@ -44,7 +45,7 @@ add_dependencies(program_1 cdl_pp_target)
 # add_dependencies(program_1 cdl_pp_target sel4platsupport sel4muslcsys muslc sel4)
 
 
-# FIXME: include directory doesn't work?
+# XXX: include directory doesn't work?
 target_include_directories(program_1 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
 # staticlly link the program_1 with the tutorial lib which is already
@@ -66,7 +67,7 @@ add_dependencies(shared cdl_pp_so_target)
 
 # message(FATAL_ERROR "Hey ! ${cdl_pp_so_target} ${cdl_pp_target}")
 
-# FIXME: modify capdl_loader.py to somehow support shared objects in
+# XXX: modify capdl_loader.py to somehow support shared objects in
 # the elf list
 list(APPEND cpio_files "$<TARGET_FILE:shared>")
 list(APPEND so_files "$<TARGET_FILE:shared>")
@@ -78,7 +79,12 @@ add_dependencies(program_2 cdl_pp_target)
 target_include_directories(program_2 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 target_link_libraries(program_2  sel4tutorials)
 
-target_link_libraries(program_2 -Wl,-Bdynamic -Wl,-z,relro,-z,now shared)
+target_link_libraries(program_2
+    -Wl,-Bdynamic
+    -Wl,-z,relro,-z,now,-q,-z,separate-code
+    -Wl,-d
+    shared)
+# target_link_libraries(program_2 -Wl,-Bdynamic shared)
 
 list(APPEND elf_files "$<TARGET_FILE:program_2>")
 list(APPEND cpio_files "$<TARGET_FILE:program_2>")

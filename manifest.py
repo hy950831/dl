@@ -253,14 +253,12 @@ region_symbols = {
         # libraries which are statically compiled which couldn't be linked
         # with the so file(Even if we can then the dynamic linking is
         # then meaningless by statically linking everything into the elf)
-
         ('stack', 4096 * 4, 'size_12bit'),
     ]
 }
 
 func_symbols = {
     'shared': [
-        ('setTo10', 'void')
     ]
 }
 
