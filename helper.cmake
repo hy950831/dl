@@ -50,6 +50,13 @@ function(cdl_pp_with_so manifest_in target target_so)
     add_custom_target(${target} DEPENDS ${CDL_PP_CFILE})
 endfunction()
 
-function(cdl_calc_relo progname soname)
-    add_custom_command(OUTPUT )
+
+function(cdl_calc_relo progname soname symbolfile target)
+
+    add_custom_command(OUTPUT ${symbolfile}
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/dl_build/dl/calc_relo.py ${progname} ${soname} ${symbolfile}
+        COMMENT "Generating symbolfile for ${progname} with ${soname}"
+        )
+
+    add_custom_target(${target} DEPENDS ${symbolfile})
 endfunction()

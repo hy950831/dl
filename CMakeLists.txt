@@ -20,7 +20,6 @@ include(helper.cmake)
 # XXX: should I add the shared lib in cdl_pp?
 # or how should i modify the cdl_pp function?
 cdl_pp_with_so(${CMAKE_CURRENT_SOURCE_DIR}/manifest.py cdl_pp_target cdl_pp_so_target
-
     ELF "program_1"
     CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_program_1.c"
 
@@ -44,8 +43,6 @@ add_executable(program_1 EXCLUDE_FROM_ALL program_1.c cspace_program_1.c)
 add_dependencies(program_1 cdl_pp_target)
 # add_dependencies(program_1 cdl_pp_target sel4platsupport sel4muslcsys muslc sel4)
 
-
-# XXX: include directory doesn't work?
 target_include_directories(program_1 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
 # staticlly link the program_1 with the tutorial lib which is already
@@ -63,6 +60,8 @@ SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
 add_library(shared SHARED lib/set.c cspace_libshared.c)
 add_dependencies(shared cdl_pp_so_target)
+target_compile_options(shared PUBLIC -nostdlib)
+
 
 # target_link_libraries(program_1 -Wl,-Bdynamic shared)
 
@@ -74,12 +73,12 @@ list(APPEND cpio_files "$<TARGET_FILE:shared>")
 list(APPEND so_files "$<TARGET_FILE:shared>")
 list(APPEND elf_targets "shared")
 
-add_executable(program_2 EXCLUDE_FROM_ALL program_2.c cspace_program_2.c)
 
-# add_dependencies(program_2 Configuration cdl_pp_target sel4platsupport sel4muslcsys muslc sel4)
+add_executable(program_2 EXCLUDE_FROM_ALL program_2.c cspace_program_2.c)
 add_dependencies(program_2 cdl_pp_target)
 target_include_directories(program_2 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 target_link_libraries(program_2 sel4tutorials)
+
 
 target_link_libraries(program_2
     -Wl,-Bdynamic
@@ -101,17 +100,29 @@ cdl_ld_with_so("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec
     )
 
 
+# Here we need another copy of program_2 binary named as program_2_data which is used to
+# calculate the relocation. since the final program_2 will depend on the relocation file
+# and the program_2 binary is used to generate the relocation file which will form a strong
+# circular dependency, hence another copy should be necessary
+add_executable(program_2_data EXCLUDE_FROM_ALL program_2.c cspace_program_2.c)
+add_dependencies(program_2_data cdl_pp_target)
+target_include_directories(program_2_data PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+target_link_libraries(program_2_data sel4tutorials)
+target_link_libraries(program_2_data
+    -Wl,-Bdynamic
+    shared)
+
+
+cdl_calc_relo(${CMAKE_CURRENT_BINARY_DIR}/program_2_data ${CMAKE_CURRENT_BINARY_DIR}/libshared.so program_2_symbolfile symbolfile_tar)
+
+add_dependencies(symbolfile_tar program_2_data)
+add_dependencies(program_2 symbolfile_tar)
 
 target_link_libraries(program_2
-    -Wl,--just-symbols=${CMAKE_CURRENT_LIST_DIR}/symbolfile
+    -Wl,--just-symbols=${CMAKE_CURRENT_BINARY_DIR}/program_2_symbolfile
     )
 
 
 DeclareCDLRootImage("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec ELF ${cpio_files} ELF_DEPENDS ${elf_targets})
 
-set(FINISH_COMPLETION_TEXT "lazy")
-set(START_COMPLETION_TEXT "
-the
-the
-the")
 configure_file(${CMAKE_SOURCE_DIR}/projects/sel4-tutorials/tools/expect.py ${CMAKE_BINARY_DIR}/check @ONLY)

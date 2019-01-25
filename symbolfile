@@ -1,5 +1,0 @@
-progname = 0x428004;
-testGlobal = 0x428000;
-setTo1 = 0x426020;
-setTo10 = 0x426000;
-setTo2 = 0x426040;
