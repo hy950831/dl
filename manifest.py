@@ -9,8 +9,6 @@ cnode_program_1 = CNode("cnode_program_1", 2) # A CNode which has 3 slots
 cnode_program_2 = CNode("cnode_program_2", 2) # A CNode which has 3 slots
 cnode_shared_lib = CNode("cnode_shared_lib", 2)
 
-
-
 shared_frame_obj = Frame("shared_frame_obj", 4096)
 
 ep = Endpoint("endpoint")
@@ -96,10 +94,10 @@ stack_7_program_2_obj = Frame("stack_7_program_2_obj", 4096)
 stack_8_program_2_obj = Frame("stack_8_program_2_obj", 4096)
 stack_9_program_2_obj = Frame("stack_9_program_2_obj", 4096)
 
-stack_0_shared_lib_obj = Frame("stack_0_shared_lib_obj", 4096)
-stack_1_shared_lib_obj = Frame("stack_1_shared_lib_obj", 4096)
-stack_2_shared_lib_obj = Frame("stack_2_shared_lib_obj", 4096)
-stack_3_shared_lib_obj = Frame("stack_3_shared_lib_obj", 4096)
+#  stack_0_shared_lib_obj = Frame("stack_0_shared_lib_obj", 4096)
+#  stack_1_shared_lib_obj = Frame("stack_1_shared_lib_obj", 4096)
+#  stack_2_shared_lib_obj = Frame("stack_2_shared_lib_obj", 4096)
+#  stack_3_shared_lib_obj = Frame("stack_3_shared_lib_obj", 4096)
 
 obj = set([
 cnode_program_1,
@@ -128,10 +126,10 @@ stack_8_program_1_obj,
 stack_8_program_2_obj,
 stack_9_program_1_obj,
 stack_9_program_2_obj,
-stack_0_shared_lib_obj,
-stack_1_shared_lib_obj,
-stack_2_shared_lib_obj,
-stack_3_shared_lib_obj,
+#  stack_0_shared_lib_obj,
+#  stack_1_shared_lib_obj,
+#  stack_2_shared_lib_obj,
+#  stack_3_shared_lib_obj,
 vspace_program_1,
 vspace_program_2,
 vspace_shared,
@@ -163,17 +161,8 @@ cspaces = {
     'shared': shared_lib_alloc
 }
 
-
 shared_addr_alloc = AddressSpaceAllocator('addr allocator libshared.so', vspace_shared)
-shared_addr_alloc._symbols = {
-'stack': (
-    [4096, 4096, 4096, 4096],
-    [Cap(stack_0_shared_lib_obj, read=True, write=True),
-     Cap(stack_1_shared_lib_obj, read=True, write=True),
-     Cap(stack_2_shared_lib_obj, read=True, write=True),
-     Cap(stack_3_shared_lib_obj, read=True, write=True),
-    ]),
-}
+shared_addr_alloc._symbols = {}
 
 program_1_addr_alloc = AddressSpaceAllocator('addr allocator 1', vspace_program_1)
 program_1_addr_alloc._symbols = {
@@ -237,14 +226,16 @@ cap_symbols = {
 
 region_symbols = {
     'program_1': [
-        ('stack', 40960, 'size_12bit'),
-        ('mainIpcBuffer', 4096, 'size_12bit'),
-        ('sharedFrame', 4096, 'size_12bit')
+        ('stack', 4096 * 10, '.bss'),
+        ('mainIpcBuffer', 4096, '.bss'),
+        ('sharedFrame', 4096, '.bss'),
+        ('sharedLibFrame', 4096 * 8, '.bss')
     ],
     'program_2': [
-        ('stack', 40960, 'size_12bit'),
-        ('mainIpcBuffer', 4096, 'size_12bit'),
-        ('sharedFrame', 4096, 'size_12bit')
+        ('stack', 4096 * 10, '.bss'),
+        ('mainIpcBuffer', 4096, '.bss'),
+        ('sharedFrame', 4096, '.bss'),
+        ('sharedLibFrame', 4096 * 8, '.bss')
     ],
     'shared': [
         # FIXME: Currently this thing(allocate region sym) is done
@@ -253,7 +244,7 @@ region_symbols = {
         # libraries which are statically compiled which couldn't be linked
         # with the so file(Even if we can then the dynamic linking is
         # then meaningless by statically linking everything into the elf)
-        ('stack', 4096 * 4, 'size_12bit'),
+        #  ('stack', 4096 * 4, 'size_12bit'),
     ]
 }
 
@@ -270,5 +261,4 @@ elfs =  {
 
 
 print(pickle.dumps((objects, cspaces, addr_spaces, cap_symbols, region_symbols, elfs, func_symbols)))
-
 

@@ -55,6 +55,7 @@ target_link_libraries(program_1 sel4tutorials)
 # add the result file of program_1 to the elf_files list
 list(APPEND elf_files "$<TARGET_FILE:program_1>")
 list(APPEND cpio_files "$<TARGET_FILE:program_1>")
+
 # add program_1 to target list
 list(APPEND elf_targets "program_1")
 
@@ -74,16 +75,18 @@ list(APPEND so_files "$<TARGET_FILE:shared>")
 list(APPEND elf_targets "shared")
 
 add_executable(program_2 EXCLUDE_FROM_ALL program_2.c cspace_program_2.c)
+
 # add_dependencies(program_2 Configuration cdl_pp_target sel4platsupport sel4muslcsys muslc sel4)
 add_dependencies(program_2 cdl_pp_target)
 target_include_directories(program_2 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
-target_link_libraries(program_2  sel4tutorials)
+target_link_libraries(program_2 sel4tutorials)
 
 target_link_libraries(program_2
     -Wl,-Bdynamic
-    -Wl,-z,relro,-z,now,-q,-z,separate-code
+    # -Wl,-z,relro,-z,now,-q,-z,separate-code
     -Wl,-d
     shared)
+
 # target_link_libraries(program_2 -Wl,-Bdynamic shared)
 
 list(APPEND elf_files "$<TARGET_FILE:program_2>")
@@ -98,8 +101,13 @@ cdl_ld_with_so("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec
     )
 
 
-DeclareCDLRootImage("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec ELF ${cpio_files} ELF_DEPENDS ${elf_targets})
 
+target_link_libraries(program_2
+    -Wl,--just-symbols=${CMAKE_CURRENT_LIST_DIR}/symbolfile
+    )
+
+
+DeclareCDLRootImage("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec ELF ${cpio_files} ELF_DEPENDS ${elf_targets})
 
 set(FINISH_COMPLETION_TEXT "lazy")
 set(START_COMPLETION_TEXT "
