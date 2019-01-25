@@ -49,3 +49,7 @@ function(cdl_pp_with_so manifest_in target target_so)
     add_custom_target(${target_so} DEPENDS ${CDL_PP_SO_CFILE})
     add_custom_target(${target} DEPENDS ${CDL_PP_CFILE})
 endfunction()
+
+function(cdl_calc_relo progname soname)
+    add_custom_command(OUTPUT )
+endfunction()
