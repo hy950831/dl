@@ -60,19 +60,18 @@ SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
 add_library(shared SHARED lib/set.c cspace_libshared.c)
 add_dependencies(shared cdl_pp_so_target)
-target_compile_options(shared PUBLIC -nostdlib)
+target_compile_options(shared PUBLIC -nostdlib -fPIC)
 
 
 # target_link_libraries(program_1 -Wl,-Bdynamic shared)
 
 # message(FATAL_ERROR "Hey ! ${cdl_pp_so_target} ${cdl_pp_target}")
 
-# XXX: modify capdl_loader.py to somehow support shared objects in
+# NOTE: modify capdl_loader.py to somehow support shared objects in
 # the elf list
 list(APPEND cpio_files "$<TARGET_FILE:shared>")
 list(APPEND so_files "$<TARGET_FILE:shared>")
 list(APPEND elf_targets "shared")
-
 
 add_executable(program_2 EXCLUDE_FROM_ALL program_2.c cspace_program_2.c)
 add_dependencies(program_2 cdl_pp_target)
@@ -83,7 +82,7 @@ target_link_libraries(program_2 sel4tutorials)
 target_link_libraries(program_2
     -Wl,-Bdynamic
     # -Wl,-z,relro,-z,now,-q,-z,separate-code
-    -Wl,-d
+    # -Wl,-d
     shared)
 
 # target_link_libraries(program_2 -Wl,-Bdynamic shared)
@@ -108,20 +107,37 @@ add_executable(program_2_data EXCLUDE_FROM_ALL program_2.c cspace_program_2.c)
 add_dependencies(program_2_data cdl_pp_target)
 target_include_directories(program_2_data PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 target_link_libraries(program_2_data sel4tutorials)
+
+add_executable(program_1_data EXCLUDE_FROM_ALL program_1.c cspace_program_1.c)
+add_dependencies(program_1_data cdl_pp_target)
+target_include_directories(program_1_data PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+target_link_libraries(program_1_data sel4tutorials)
+
 target_link_libraries(program_2_data
     -Wl,-Bdynamic
     shared)
 
+target_link_libraries(program_1_data
+    -Wl,-Bdynamic
+    shared)
 
-cdl_calc_relo(${CMAKE_CURRENT_BINARY_DIR}/program_2_data ${CMAKE_CURRENT_BINARY_DIR}/libshared.so program_2_symbolfile symbolfile_tar)
 
-add_dependencies(symbolfile_tar program_2_data)
-add_dependencies(program_2 symbolfile_tar)
+cdl_calc_relo(${CMAKE_CURRENT_BINARY_DIR}/program_1_data ${CMAKE_CURRENT_BINARY_DIR}/libshared.so program_1_symbolfile symbolfile_tar_1)
+cdl_calc_relo(${CMAKE_CURRENT_BINARY_DIR}/program_2_data ${CMAKE_CURRENT_BINARY_DIR}/libshared.so program_2_symbolfile symbolfile_tar_2)
+
+add_dependencies(symbolfile_tar_2 program_2_data)
+add_dependencies(program_2 symbolfile_tar_2)
+
+add_dependencies(symbolfile_tar_1 program_1_data)
+add_dependencies(program_2 symbolfile_tar_1)
 
 target_link_libraries(program_2
     -Wl,--just-symbols=${CMAKE_CURRENT_BINARY_DIR}/program_2_symbolfile
     )
 
+target_link_libraries(program_1
+    -Wl,--just-symbols=${CMAKE_CURRENT_BINARY_DIR}/program_1_symbolfile
+    )
 
 DeclareCDLRootImage("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec ELF ${cpio_files} ELF_DEPENDS ${elf_targets})
 

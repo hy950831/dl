@@ -248,11 +248,6 @@ region_symbols = {
     ]
 }
 
-func_symbols = {
-    'shared': [
-    ]
-}
-
 elfs =  {
     'program_1': {'passive': False, 'filename': 'program_1.c'},
     'program_2': {'passive': False, 'filename': 'program_2.c'},
@@ -260,5 +255,5 @@ elfs =  {
          }
 
 
-print(pickle.dumps((objects, cspaces, addr_spaces, cap_symbols, region_symbols, elfs, func_symbols)))
+print(pickle.dumps((objects, cspaces, addr_spaces, cap_symbols, region_symbols, elfs)))
 
