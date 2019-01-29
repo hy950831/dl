@@ -54,7 +54,7 @@ endfunction()
 function(cdl_calc_relo progname soname symbolfile target)
 
     add_custom_command(OUTPUT ${symbolfile}
-        COMMAND python3 ${CMAKE_SOURCE_DIR}/dl_build/dl/calc_relo.py ${progname} ${soname} ${symbolfile}
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/projects/camkes/capdl/cdl_utils/calc_relo.py ${progname} ${soname} ${symbolfile}
         COMMENT "Generating symbolfile for ${progname} with ${soname}"
         )
 

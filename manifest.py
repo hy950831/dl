@@ -229,13 +229,13 @@ region_symbols = {
         ('stack', 4096 * 10, '.bss'),
         ('mainIpcBuffer', 4096, '.bss'),
         ('sharedFrame', 4096, '.bss'),
-        ('sharedLibFrame', 4096 * 8, '.bss')
+        ('sharedLibFrame', 4096 * 20, '.bss')
     ],
     'program_2': [
         ('stack', 4096 * 10, '.bss'),
         ('mainIpcBuffer', 4096, '.bss'),
         ('sharedFrame', 4096, '.bss'),
-        ('sharedLibFrame', 4096 * 8, '.bss')
+        ('sharedLibFrame', 4096 * 20, '.bss')
     ],
     'shared': [
         # FIXME: Currently this thing(allocate region sym) is done

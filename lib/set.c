@@ -1,13 +1,8 @@
 int testGlobal = 1009838;
 
-#define DUMMY_SIZE 100000000
-char dummy_char[DUMMY_SIZE] = {'a'};
-
 static void doSet(int* in, int num);
 
 void setTo10(int* in) {
-    dummy_char[DUMMY_SIZE-1] = '\n';
-    if(dummy_char[0] == 'a')
         doSet(in, 10);
 }
 
