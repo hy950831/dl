@@ -94,11 +94,6 @@ stack_7_program_2_obj = Frame("stack_7_program_2_obj", 4096)
 stack_8_program_2_obj = Frame("stack_8_program_2_obj", 4096)
 stack_9_program_2_obj = Frame("stack_9_program_2_obj", 4096)
 
-#  stack_0_shared_lib_obj = Frame("stack_0_shared_lib_obj", 4096)
-#  stack_1_shared_lib_obj = Frame("stack_1_shared_lib_obj", 4096)
-#  stack_2_shared_lib_obj = Frame("stack_2_shared_lib_obj", 4096)
-#  stack_3_shared_lib_obj = Frame("stack_3_shared_lib_obj", 4096)
-
 obj = set([
 cnode_program_1,
 cnode_program_2,
@@ -126,10 +121,6 @@ stack_8_program_1_obj,
 stack_8_program_2_obj,
 stack_9_program_1_obj,
 stack_9_program_2_obj,
-#  stack_0_shared_lib_obj,
-#  stack_1_shared_lib_obj,
-#  stack_2_shared_lib_obj,
-#  stack_3_shared_lib_obj,
 vspace_program_1,
 vspace_program_2,
 vspace_shared,

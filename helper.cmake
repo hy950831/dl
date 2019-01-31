@@ -60,3 +60,32 @@ function(cdl_calc_relo progname soname symbolfile target)
 
     add_custom_target(${target} DEPENDS ${symbolfile})
 endfunction()
+
+
+function(cdl_pp_so shared_lib shared_lib_aux shared_lib_symbol)
+    add_custom_command(OUTPUT ${shared_lib_aux}
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/projects/camkes/capdl/cdl_utils/so_pp.py ${shared_lib} ${shared_lib_aux} ${shared_lib_symbol}
+        COMMENT "Generating shared library linking aux file for ${shared_lib}"
+        )
+endfunction()
+
+function(DeclareCDLRootImageDyn cdl cdl_target)
+    cmake_parse_arguments(PARSE_ARGV 2 CDLROOTTASK "" "" "ELF;ELF_DEPENDS")
+    if (NOT "${CDLROOTTASK_UNPARSED_ARGUMENTS}" STREQUAL "")
+        message(FATAL_ERROR "Unknown arguments to DeclareCDLRootImage")
+    endif()
+
+    CapDLToolCFileGen(${cdl_target}_cspec ${cdl_target}_cspec.c ${cdl} "${CAPDL_TOOL_BINARY}"
+        MAX_IRQS ${CapDLLoaderMaxIRQs}
+        DEPENDS ${cdl_target} install_capdl_tool "${CAPDL_TOOL_BINARY}")
+
+    # Ask the CapDL tool to generate an image with our given copied/mangled instances
+    BuildCapDLApplication(
+        C_SPEC "${cdl_target}_cspec.c"
+        L_SPEC "linking.spec.c"
+        ELF ${CDLROOTTASK_ELF}
+        DEPENDS ${CDLROOTTASK_ELF_DEPENDS} ${cdl_target}_cspec
+        OUTPUT "capdl-loader"
+    )
+    DeclareRootserver("capdl-loader")
+endfunction()

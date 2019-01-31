@@ -19,7 +19,7 @@ include(helper.cmake)
 
 # XXX: should I add the shared lib in cdl_pp?
 # or how should i modify the cdl_pp function?
-cdl_pp_with_so(${CMAKE_CURRENT_SOURCE_DIR}/manifest.py cdl_pp_target cdl_pp_so_target
+cdl_pp(${CMAKE_CURRENT_SOURCE_DIR}/manifest.py cdl_pp_target
     ELF "program_1"
     CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_program_1.c"
 
@@ -32,10 +32,9 @@ cdl_pp_with_so(${CMAKE_CURRENT_SOURCE_DIR}/manifest.py cdl_pp_target cdl_pp_so_t
     # compiled, hence i need to modify cdl_pp(func manifest in capdl_linker.py)
     # somehow to correctly process shared libs
     # NOTE: issue above resolved
-    SO "libshared.so"
-    SO_CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_libshared.c"
+    # SO "libshared.so"
+    # SO_CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_libshared.c"
 )
-
 
 add_executable(program_1 EXCLUDE_FROM_ALL program_1.c cspace_program_1.c)
 # this cdl_pp_target is the generated cspace_program_*.c
@@ -44,7 +43,6 @@ add_dependencies(program_1 cdl_pp_target)
 # add_dependencies(program_1 cdl_pp_target sel4platsupport sel4muslcsys muslc sel4)
 
 target_include_directories(program_1 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
-
 # staticlly link the program_1 with the tutorial lib which is already
 # linked with sel4 muslc and etc
 target_link_libraries(program_1 sel4tutorials)
@@ -58,14 +56,32 @@ list(APPEND elf_targets "program_1")
 
 SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
-add_library(shared SHARED lib/set.c cspace_libshared.c)
-add_dependencies(shared cdl_pp_so_target)
-target_compile_options(shared PUBLIC -nostdlib -fPIC)
+# add_library(shared_data SHARED lib/set.c)
+# target_compile_options(
+    # shared_data PRIVATE
+    # -fPIC -nostdlib
+    # )
 
+# cdl_pp_so(${CMAKE_CURRENT_BINARY_DIR}/libshared_data.so shared_aux.c shared_symbolfile)
 
-# target_link_libraries(program_1 -Wl,-Bdynamic shared)
+add_library(shared SHARED lib/set.c )
+target_compile_options(
+    shared PRIVATE
+    -fPIC -nostdlib
+    )
 
-# message(FATAL_ERROR "Hey ! ${cdl_pp_so_target} ${cdl_pp_target}")
+# add_library(shared_aux STATIC shared_aux.c)
+# target_compile_options(
+    # shared_aux PRIVATE
+    # -fno-pic -fno-pie -nostdlib
+    # -static
+    # )
+# target_link_libraries(shared
+    # -Wl,--just-symbols=${CMAKE_CURRENT_BINARY_DIR}/shared_symbolfile
+    # shared_aux
+    # )
+# add_dependencies(shared shared_data)
+
 
 # NOTE: modify capdl_loader.py to somehow support shared objects in
 # the elf list
@@ -77,8 +93,6 @@ add_executable(program_2 EXCLUDE_FROM_ALL program_2.c cspace_program_2.c)
 add_dependencies(program_2 cdl_pp_target)
 target_include_directories(program_2 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 target_link_libraries(program_2 sel4tutorials)
-
-# target_link_libraries(program_2 -Wl,-Bdynamic shared)
 
 list(APPEND elf_files "$<TARGET_FILE:program_2>")
 list(APPEND cpio_files "$<TARGET_FILE:program_2>")
@@ -126,6 +140,6 @@ target_link_libraries(program_2
     # -Wl,--just-symbols=${CMAKE_CURRENT_BINARY_DIR}/program_1_symbolfile
     # )
 
-DeclareCDLRootImage("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec ELF ${cpio_files} ELF_DEPENDS ${elf_targets})
+DeclareCDLRootImageDyn("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec ELF ${cpio_files} ELF_DEPENDS ${elf_targets})
 
 configure_file(${CMAKE_SOURCE_DIR}/projects/sel4-tutorials/tools/expect.py ${CMAKE_BINARY_DIR}/check @ONLY)
