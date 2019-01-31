@@ -28,11 +28,9 @@ int main(int c, char *argv[]) {
 
     int local = getLocal();
     printf("In program 2 the local store %d\n", local);
-
     setLocalTo10();
     local = getLocal();
     printf("In program 2 the local store %d\n", local);
-
     setLocalTo100();
     local = getLocal();
     printf("In program 2 the local store %d\n", local);

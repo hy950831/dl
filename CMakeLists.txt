@@ -56,32 +56,11 @@ list(APPEND elf_targets "program_1")
 
 SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
-# add_library(shared_data SHARED lib/set.c)
-# target_compile_options(
-    # shared_data PRIVATE
-    # -fPIC -nostdlib
-    # )
-
-# cdl_pp_so(${CMAKE_CURRENT_BINARY_DIR}/libshared_data.so shared_aux.c shared_symbolfile)
-
 add_library(shared SHARED lib/set.c )
 target_compile_options(
     shared PRIVATE
     -fPIC -nostdlib
     )
-
-# add_library(shared_aux STATIC shared_aux.c)
-# target_compile_options(
-    # shared_aux PRIVATE
-    # -fno-pic -fno-pie -nostdlib
-    # -static
-    # )
-# target_link_libraries(shared
-    # -Wl,--just-symbols=${CMAKE_CURRENT_BINARY_DIR}/shared_symbolfile
-    # shared_aux
-    # )
-# add_dependencies(shared shared_data)
-
 
 # NOTE: modify capdl_loader.py to somehow support shared objects in
 # the elf list
@@ -136,9 +115,10 @@ target_link_libraries(program_2
     -Wl,-Bdynamic shared
     )
 
-# target_link_libraries(program_1
-    # -Wl,--just-symbols=${CMAKE_CURRENT_BINARY_DIR}/program_1_symbolfile
-    # )
+target_link_libraries(program_1
+    -Wl,--just-symbols=${CMAKE_CURRENT_BINARY_DIR}/program_1_symbolfile
+    -Wl,-Bdynamic shared
+    )
 
 DeclareCDLRootImageDyn("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec ELF ${cpio_files} ELF_DEPENDS ${elf_targets})
 
