@@ -23,15 +23,6 @@ cdl_pp(${CMAKE_CURRENT_SOURCE_DIR}/manifest.py cdl_pp_target
 
     ELF "program_2"
     CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_program_2.c"
-
-    # XXX: go understand the cdl_pp process
-    # NOTE: currently the cdl_pp processing will create a symbol declearation
-    # file which depends on sel4 and other libraries. which are statically
-    # compiled, hence i need to modify cdl_pp(func manifest in capdl_linker.py)
-    # somehow to correctly process shared libs
-    # NOTE: issue above resolved
-    # SO "libshared.so"
-    # SO_CFILE "${CMAKE_CURRENT_BINARY_DIR}/cspace_libshared.c"
 )
 
 add_executable(program_1 EXCLUDE_FROM_ALL program_1.c cspace_program_1.c)
@@ -41,8 +32,6 @@ add_dependencies(program_1 cdl_pp_target)
 # add_dependencies(program_1 cdl_pp_target sel4platsupport sel4muslcsys muslc sel4)
 
 target_include_directories(program_1 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
-# staticlly link the program_1 with the tutorial lib which is already
-# linked with sel4 muslc and etc
 target_link_libraries(program_1 sel4tutorials)
 
 # add the result file of program_1 to the elf_files list
@@ -53,7 +42,6 @@ list(APPEND cpio_files "$<TARGET_FILE:program_1>")
 list(APPEND elf_targets "program_1")
 
 SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
-
 add_library(shared SHARED lib/set.c )
 target_compile_options(
     shared PRIVATE
@@ -99,8 +87,9 @@ target_include_directories(program_1_data PUBLIC "${CMAKE_CURRENT_LIST_DIR}/incl
 target_link_libraries(program_1_data sel4tutorials)
 target_link_libraries(program_1_data -Wl,-Bdynamic shared)
 
-cdl_calc_relo(${CMAKE_CURRENT_BINARY_DIR}/program_1_data ${CMAKE_CURRENT_BINARY_DIR}/libshared.so program_1_symbolfile symbolfile_tar_1)
-cdl_calc_relo(${CMAKE_CURRENT_BINARY_DIR}/program_2_data ${CMAKE_CURRENT_BINARY_DIR}/libshared.so program_2_symbolfile symbolfile_tar_2)
+cdl_calc_relo($<TARGET_FILE:program_1_data> $<TARGET_FILE:shared> program_1_symbolfile symbolfile_tar_1)
+cdl_calc_relo($<TARGET_FILE:program_2_data> $<TARGET_FILE:shared> program_2_symbolfile symbolfile_tar_2)
+
 
 add_dependencies(symbolfile_tar_2 program_2_data)
 add_dependencies(program_2 symbolfile_tar_2)

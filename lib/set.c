@@ -2,13 +2,22 @@ int testGlobal = 1009838;
 int testGlobal2 = 1009838;
 int testGlobal3 = 1009838;
 
-static int testLocal = 0;
+#define RUBBISH_SIZE 1000000
+char rubbish[RUBBISH_SIZE] = {'a'};
 
 static void doSet(int* in, int num);
+
+
+static void dummy() {
+    rubbish[RUBBISH_SIZE-1] = '\n';
+    if(rubbish[0] == 'a');
+}
 
 void setTo10(int* in) {
     doSet(in, 10);
 }
+
+static int testLocal = 0;
 
 void setTo1(int* in) {
     doSet(in, 1);
