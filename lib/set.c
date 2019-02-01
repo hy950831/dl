@@ -1,6 +1,7 @@
 int testGlobal = 1009838;
 int testGlobal2 = 1009838;
 int testGlobal3 = 1009838;
+
 static int testLocal = 0;
 
 static void doSet(int* in, int num);
