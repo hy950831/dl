@@ -1,23 +1,11 @@
 int testGlobal = 1009838;
-int testGlobal2 = 1009838;
-int testGlobal3 = 1009838;
-
-#define RUBBISH_SIZE 1000000
-char rubbish[RUBBISH_SIZE] = {'a'};
+static int testLocal = 0;
 
 static void doSet(int* in, int num);
-
-
-static void dummy() {
-    rubbish[RUBBISH_SIZE-1] = '\n';
-    if(rubbish[0] == 'a');
-}
 
 void setTo10(int* in) {
     doSet(in, 10);
 }
-
-static int testLocal = 0;
 
 void setTo1(int* in) {
     doSet(in, 1);
@@ -31,29 +19,18 @@ static void doSet(int* in, int num) {
     *in = num;
 }
 
-void setGlobalTo10() {
-    testGlobal = 10;
-    testGlobal2 = 10;
-    testGlobal3 = 10;
-}
-
-void setGlobalTo100() {
-    testGlobal = 100;
-    testGlobal2 = 100;
-    testGlobal3 = 100;
-}
-
 int getLocal() {
     return testLocal;
 }
 
 void setLocalTo10() {
     doSet(&testLocal, 10);
-    /* testLocal = 10; */
 }
 
 void setLocalTo100() {
     doSet(&testLocal, 100);
-    /* testLocal = 100; */
 }
 
+
+#define RUBBISH_SIZE 1500000
+__attribute__((used)) static char rubbish[RUBBISH_SIZE] = {'a'};

@@ -229,13 +229,6 @@ region_symbols = {
         ('sharedLibFrame', 4096 * 2000, '.bss')
     ],
     'shared': [
-        # FIXME: Currently this thing(allocate region sym) is done
-        # by cdl_pp  where the region symbols are defined in a generated c
-        # file and the generated c file is depended on sel4 and other
-        # libraries which are statically compiled which couldn't be linked
-        # with the so file(Even if we can then the dynamic linking is
-        # then meaningless by statically linking everything into the elf)
-        #  ('stack', 4096 * 4, 'size_12bit'),
     ]
 }
 

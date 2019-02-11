@@ -13,10 +13,7 @@ int main(int c, char *argv[]) {
     int id = 2;
     printf("Program %d: Running!\n", id);
 
-    ZF_LOGD("setTo10's Addr is %p, %zx", &setTo10, *(uint64_t *)&setTo10);
-    ZF_LOGD("The global variable addr is %p\n", &testGlobal);
-    ZF_LOGD("The global variable is %d", testGlobal);
-
+    printf("The global variable is %d\n", testGlobal);
 
     printf("In program 2 the shared frame store before setTo10 %d\n", *(int*)SHARED_VADDR);
     setTo10(t);

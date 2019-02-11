@@ -74,7 +74,6 @@ cdl_ld_with_so("${CMAKE_CURRENT_BINARY_DIR}/spec.cdl" capdl_spec
 # calculate the relocation. since the final program_2 will depend on the relocation file
 # and the program_2 binary is used to generate the relocation file which will form a strong
 # circular dependency, hence another copy should be necessary
-
 add_executable(program_2_data EXCLUDE_FROM_ALL program_2.c cspace_program_2.c)
 add_dependencies(program_2_data cdl_pp_target)
 target_include_directories(program_2_data PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
@@ -89,7 +88,6 @@ target_link_libraries(program_1_data -Wl,-Bdynamic shared)
 
 cdl_calc_relo($<TARGET_FILE:program_1_data> $<TARGET_FILE:shared> program_1_symbolfile symbolfile_tar_1)
 cdl_calc_relo($<TARGET_FILE:program_2_data> $<TARGET_FILE:shared> program_2_symbolfile symbolfile_tar_2)
-
 
 add_dependencies(symbolfile_tar_2 program_2_data)
 add_dependencies(program_2 symbolfile_tar_2)
